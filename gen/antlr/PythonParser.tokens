@@ -1,0 +1,8 @@
+PRINT=1
+LBK=2
+RBK=3
+ID=4
+NEWLINE=5
+'print'=1
+'('=2
+')'=3
