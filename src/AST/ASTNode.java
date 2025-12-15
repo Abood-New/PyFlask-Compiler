@@ -1,15 +1,30 @@
 package AST;
 
 public abstract class ASTNode {
-    public int line;
-//    protected String indent(int level) {
-//        return "  ".repeat(level);  // 2 spaces per indent
-//    }
-//
-//    public abstract String prettyPrint(int level);
-//
-//    @Override
-//    public String toString() {
-//        return prettyPrint(0);  // default: start from indent 0
-//    }
+    protected final int line;
+    protected final String nodeName;
+
+    protected ASTNode(int line, String nodeName) {
+        this.line = line;
+        this.nodeName = nodeName;
+    }
+
+    public int getLine() {
+        return line;
+    }
+
+    public String getNodeName() {
+        return nodeName;
+    }
+
+    protected String indent(int level) {
+        return "  ".repeat(level);
+    }
+
+    public abstract String prettyPrint(int indent);
+
+    @Override
+    public String toString() {
+        return prettyPrint(0);
+    }
 }

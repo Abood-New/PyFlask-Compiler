@@ -96,7 +96,7 @@
         <PerGrammarGenerationSettings>
           <option name="fileName" value="$PROJECT_DIR$/src/antlr/PythonLexer.g4" />
           <option name="autoGen" value="true" />
-          <option name="outputDir" value="C:\Users\msi\Desktop\antlr\untitled\src" />
+          <option name="outputDir" value="C:\Users\msi\Desktop\antlr\untitled\PyFlask-Compiler\src" />
           <option name="libDir" value="" />
           <option name="encoding" value="" />
           <option name="pkg" value="" />
@@ -106,7 +106,7 @@
         <PerGrammarGenerationSettings>
           <option name="fileName" value="$PROJECT_DIR$/src/antlr/PythonParser.g4" />
           <option name="autoGen" value="true" />
-          <option name="outputDir" value="C:\Users\msi\Desktop\antlr\untitled\src" />
+          <option name="outputDir" value="C:\Users\msi\Desktop\antlr\untitled\PyFlask-Compiler\src" />
           <option name="libDir" value="" />
           <option name="encoding" value="" />
           <option name="pkg" value="" />

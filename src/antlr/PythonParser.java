@@ -1,4 +1,4 @@
-// Generated from C:/Users/msi/Desktop/antlr/untitled/src/antlr/PythonParser.g4 by ANTLR 4.13.2
+// Generated from C:/Users/msi/Desktop/antlr/untitled/PyFlask-Compiler/src/antlr/PythonParser.g4 by ANTLR 4.13.2
 package antlr;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
@@ -44,7 +44,8 @@ public class PythonParser extends Parser {
 			null, null, "'print'", "'def'", "'return'", "'import'", "'from'", "'@'", 
 			"'='", "','", "'.'", "':'", "'('", "')'", "'['", "']'", "'{'", "'}'", 
 			"'+'", "'-'", "'*'", "'/'", "'<'", "'>'", "'<='", "'>='", "'=='", "'!='", 
-			"'if'", "'else'", "'for'", "'in'", "'while'", "'var'"
+			"'if'", "'else'", "'for'", "'in'", "'while'", "'var'", null, null, null, 
+			null, "'<INDENT>'", "'<DEDENT>'"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();

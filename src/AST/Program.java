@@ -2,20 +2,28 @@ package AST;
 
 import java.util.List;
 
-public class Program extends ASTNode{
-    List<Statement> statements;
-    public Program(List<Statement> statements) {
+public class Program extends ASTNode {
+    private final List<Statement> statements;
+
+    public Program(int line, List<Statement> statements) {
+        super(line, "Program");
         this.statements = statements;
     }
 
-    @Override public String toString() { return "Program" + statements; }
+    @Override
+    public String prettyPrint(int indent) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(indent(indent))
+                .append(nodeName)
+                .append(" (line ")
+                .append(line)
+                .append(")\n");
 
-//    public String prettyPrint(int level) {
-//        StringBuilder sb = new StringBuilder("Program[\n");
-//        for (ASTNode st : statements) {
-//            sb.append(st.prettyPrint(level + 1)).append("\n");
-//        }
-//        sb.append("]");
-//        return sb.toString();
-//    }
+        for (Statement st : statements) {
+            if (st != null) {
+                sb.append(st.prettyPrint(indent + 1));
+            }
+        }
+        return sb.toString();
+    }
 }
