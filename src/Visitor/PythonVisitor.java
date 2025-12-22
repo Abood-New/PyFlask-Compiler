@@ -95,6 +95,16 @@ public class PythonVisitor extends PythonParserBaseVisitor<ASTNode> {
     }
 
     @Override
+    public ASTNode visitForStatement(PythonParser.ForStatementContext ctx) {
+        Expression loopVar = (Expression) visit(ctx.expr(0));  // Loop variable
+        Expression iterable = (Expression) visit(ctx.expr(1));  // Iterable expression
+        Block body = (Block) visit(ctx.block());
+        int line = ctx.getStart().getLine();
+
+        return new AST.Statements.ForStmt(line, loopVar, iterable, body);
+    }
+
+    @Override
     public ASTNode visitFunctionDefinition(PythonParser.FunctionDefinitionContext ctx) {
         String name = ctx.ID().getText();
         List<String> params = new ArrayList<>();
