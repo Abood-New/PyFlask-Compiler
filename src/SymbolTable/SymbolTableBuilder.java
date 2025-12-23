@@ -8,8 +8,9 @@ import AST.Statements.*;
  * Visitor that builds a symbol table by traversing the AST.
  * Tracks variables, functions, parameters, and imports.
  */
-public class SymbolTableBuilder extends ASTVisitor {
+public class SymbolTableBuilder {
     private SymbolTable symbolTable;
+    private boolean inIfBlock = false;
 
     public SymbolTableBuilder() {
         this.symbolTable = new SymbolTable();
@@ -19,16 +20,64 @@ public class SymbolTableBuilder extends ASTVisitor {
         return symbolTable;
     }
 
-    @Override
-    public void visit(Program node) {
+    public void visit(ASTNode node) {
+        if (node == null) return;
+
+        if (node instanceof Program) {
+            visitProgram((Program) node);
+        } else if (node instanceof Block) {
+            visitBlock((Block) node);
+        } else if (node instanceof FunctionDef) {
+            visitFunctionDef((FunctionDef) node);
+        } else if (node instanceof AssignStmt) {
+            visitAssignStmt((AssignStmt) node);
+        } else if (node instanceof IfStmt) {
+            visitIfStmt((IfStmt) node);
+        } else if (node instanceof WhileStmt) {
+            visitWhileStmt((WhileStmt) node);
+        } else if (node instanceof ForStmt) {
+            visitForStmt((ForStmt) node);
+        } else if (node instanceof ImportStmt) {
+            visitImportStmt((ImportStmt) node);
+        } else if (node instanceof PrintStmt) {
+            visitPrintStmt((PrintStmt) node);
+        } else if (node instanceof ReturnStmt) {
+            visitReturnStmt((ReturnStmt) node);
+        } else if (node instanceof ExprStmt) {
+            visitExprStmt((ExprStmt) node);
+        } else if (node instanceof IdentifierExpr) {
+            visitIdentifierExpr((IdentifierExpr) node);
+        } else if (node instanceof FunctionCallExpr) {
+            visitFunctionCallExpr((FunctionCallExpr) node);
+        } else if (node instanceof BinaryExpr) {
+            visitBinaryExpr((BinaryExpr) node);
+        } else if (node instanceof ArrayLiteral) {
+            visitArrayLiteral((ArrayLiteral) node);
+        } else if (node instanceof DictLiteral) {
+            visitDictLiteral((DictLiteral) node);
+        } else if (node instanceof IndexExpr) {
+            visitIndexExpr((IndexExpr) node);
+        } else if (node instanceof AttributeExpr) {
+            visitAttributeExpr((AttributeExpr) node);
+        } else if (node instanceof KeyValue) {
+            visitKeyValue((KeyValue) node);
+        } else if (node instanceof NumberExpr) {
+            visitNumberExpr((NumberExpr) node);
+        } else if (node instanceof StringExpr) {
+            visitStringExpr((StringExpr) node);
+        } else if (node instanceof BooleanExpr) {
+            visitBooleanExpr((BooleanExpr) node);
+        }
+    }
+
+    private void visitProgram(Program node) {
         // Visit all statements in the global scope
         for (Statement stmt : node.getStatements()) {
             visit(stmt);
         }
     }
 
-    @Override
-    public void visit(Block node) {
+    private void visitBlock(Block node) {
         // Enter a new block scope
         String scopeName = "block_" + node.getLine();
         symbolTable.enterScope(scopeName, Scope.ScopeType.BLOCK, node.getLine());
@@ -42,8 +91,7 @@ public class SymbolTableBuilder extends ASTVisitor {
         symbolTable.exitScope();
     }
 
-    @Override
-    public void visit(FunctionDef node) {
+    private void visitFunctionDef(FunctionDef node) {
         // Add function to current scope
         symbolTable.addSymbol(node.name, Symbol.SymbolType.FUNCTION, node.getLine());
 
@@ -77,50 +125,83 @@ public class SymbolTableBuilder extends ASTVisitor {
         symbolTable.exitScope();
     }
 
-    @Override
-    public void visit(AssignStmt node) {
+    private void visitAssignStmt(AssignStmt node) {
         // Check if assignment target is an identifier
         if (node.name instanceof IdentifierExpr) {
             IdentifierExpr id = (IdentifierExpr) node.name;
-            // Check if variable already exists (might be a re-assignment)
-            Symbol existing = symbolTable.lookupLocal(id.name);
-            
-            if (existing == null) {
-                // New variable declaration
-                symbolTable.addSymbol(id.name, Symbol.SymbolType.VARIABLE, node.getLine());
+
+            // If we're in an if block, add to parent scope; otherwise add to current scope
+            if (inIfBlock) {
+                // Check if variable already exists in parent scope
+                Scope parentScope = symbolTable.getCurrentScope().getParent();
+                Symbol existing = parentScope != null ? parentScope.lookupLocal(id.name) : null;
+
+                if (existing == null) {
+                    // New variable declaration - add to parent scope
+                    symbolTable.addSymbolToParent(id.name, Symbol.SymbolType.VARIABLE, node.getLine());
+                }
+            } else {
+                // Check if variable already exists (might be a re-assignment)
+                Symbol existing = symbolTable.lookupLocal(id.name);
+
+                if (existing == null) {
+                    // New variable declaration
+                    symbolTable.addSymbol(id.name, Symbol.SymbolType.VARIABLE, node.getLine());
+                }
             }
             // If it exists, it's a re-assignment, which is fine
         }
         // For index expressions (array assignments), we don't add new symbols
-        
+
         // Visit the value expression
         visit(node.value);
     }
 
-    @Override
-    public void visit(IfStmt node) {
+    private void visitIfStmt(IfStmt node) {
         // Visit condition
         visit(node.condition);
 
-        // In Python, if blocks don't create new scopes - variables are in the parent scope
-        // So we visit the statements directly without creating a new scope
+        // In Python, if blocks don't create new scopes for variables - variables are in the parent scope
+        // However, we create a block scope for structural visibility (to show the if block in the symbol table)
         if (node.thenBlock != null) {
-            // Visit statements in the block without creating a new scope
+            // Create a block scope for structural visibility
+            String scopeName = "block_" + node.thenBlock.getLine();
+            symbolTable.enterScope(scopeName, Scope.ScopeType.BLOCK, node.thenBlock.getLine());
+
+            // Set flag so variables are added to parent scope
+            boolean oldInIfBlock = inIfBlock;
+            inIfBlock = true;
+
+            // Visit statements - variables will be added to parent scope due to flag
             for (Statement stmt : node.thenBlock.getStatements()) {
                 visit(stmt);
             }
+
+            // Restore flag
+            inIfBlock = oldInIfBlock;
+
+            // Exit block scope
+            symbolTable.exitScope();
         }
 
-        // Visit else block statements without creating a new scope
+        // Visit else block - same approach
         if (node.elseBlock != null) {
+            String scopeName = "block_" + node.elseBlock.getLine();
+            symbolTable.enterScope(scopeName, Scope.ScopeType.BLOCK, node.elseBlock.getLine());
+
+            boolean oldInIfBlock = inIfBlock;
+            inIfBlock = true;
+
             for (Statement stmt : node.elseBlock.getStatements()) {
                 visit(stmt);
             }
+
+            inIfBlock = oldInIfBlock;
+            symbolTable.exitScope();
         }
     }
 
-    @Override
-    public void visit(WhileStmt node) {
+    private void visitWhileStmt(WhileStmt node) {
         // Visit condition
         visit(node.condition);
 
@@ -133,8 +214,7 @@ public class SymbolTableBuilder extends ASTVisitor {
         }
     }
 
-    @Override
-    public void visit(AST.Statements.ForStmt node) {
+    private void visitForStmt(ForStmt node) {
         // Add loop variable to current scope BEFORE visiting it
         // This prevents "undefined identifier" warnings
         if (node.loopVariable instanceof IdentifierExpr) {
@@ -159,8 +239,7 @@ public class SymbolTableBuilder extends ASTVisitor {
         }
     }
 
-    @Override
-    public void visit(ImportStmt node) {
+    private void visitImportStmt(ImportStmt node) {
         // Add imported names to symbol table
         if (node.names != null) {
             for (String name : node.names) {
@@ -169,8 +248,7 @@ public class SymbolTableBuilder extends ASTVisitor {
         }
     }
 
-    @Override
-    public void visit(IdentifierExpr node) {
+    private void visitIdentifierExpr(IdentifierExpr node) {
         // Handle built-in variables like __name__
         if ("__name__".equals(node.name)) {
             // Check if __name__ is already in the symbol table
@@ -181,24 +259,23 @@ public class SymbolTableBuilder extends ASTVisitor {
             }
             return; // Don't check for undefined error for built-ins
         }
-        
+
         // Check if identifier is defined
         Symbol symbol = symbolTable.lookup(node.name);
         if (symbol == null) {
             // Undefined variable - add error
-            symbolTable.addError(String.format("Warning at line %d: Undefined identifier '%s'", 
+            symbolTable.addError(String.format("Warning at line %d: Undefined identifier '%s'",
                     node.getLine(), node.name));
         }
     }
 
-    @Override
-    public void visit(FunctionCallExpr node) {
+    private void visitFunctionCallExpr(FunctionCallExpr node) {
         // Check if function is defined
         if (node.callee instanceof IdentifierExpr) {
             IdentifierExpr id = (IdentifierExpr) node.callee;
             Symbol symbol = symbolTable.lookup(id.name);
             if (symbol == null || symbol.getType() != Symbol.SymbolType.FUNCTION) {
-                symbolTable.addError(String.format("Warning at line %d: Function '%s' may not be defined", 
+                symbolTable.addError(String.format("Warning at line %d: Function '%s' may not be defined",
                         node.getLine(), id.name));
             }
         }
@@ -211,15 +288,12 @@ public class SymbolTableBuilder extends ASTVisitor {
         }
     }
 
-    // For other expression types, just visit their children
-    @Override
-    public void visit(BinaryExpr node) {
+    private void visitBinaryExpr(BinaryExpr node) {
         visit(node.left);
         visit(node.right);
     }
 
-    @Override
-    public void visit(ArrayLiteral node) {
+    private void visitArrayLiteral(ArrayLiteral node) {
         if (node.elements != null) {
             for (Expression item : node.elements) {
                 visit(item);
@@ -227,8 +301,7 @@ public class SymbolTableBuilder extends ASTVisitor {
         }
     }
 
-    @Override
-    public void visit(DictLiteral node) {
+    private void visitDictLiteral(DictLiteral node) {
         if (node.entries != null) {
             for (KeyValue pair : node.entries) {
                 visit(pair.key);
@@ -237,63 +310,43 @@ public class SymbolTableBuilder extends ASTVisitor {
         }
     }
 
-    @Override
-    public void visit(IndexExpr node) {
+    private void visitIndexExpr(IndexExpr node) {
         visit(node.array);
         visit(node.index);
     }
 
-    @Override
-    public void visit(AttributeExpr node) {
+    private void visitAttributeExpr(AttributeExpr node) {
         visit(node.target);
     }
 
-    @Override
-    public void visit(KeyValue node) {
+    private void visitKeyValue(KeyValue node) {
         visit(node.key);
         visit(node.value);
     }
 
-    // Leaf nodes - no children to visit
-    @Override
-    public void visit(NumberExpr node) {
+    private void visitNumberExpr(NumberExpr node) {
         // No children
     }
 
-    @Override
-    public void visit(StringExpr node) {
+    private void visitStringExpr(StringExpr node) {
         // No children
     }
 
-    @Override
-    public void visit(BooleanExpr node) {
+    private void visitBooleanExpr(BooleanExpr node) {
         // No children
     }
 
-    // Other statements
-    @Override
-    public void visit(PrintStmt node) {
+    private void visitPrintStmt(PrintStmt node) {
         visit(node.expr);
     }
 
-    @Override
-    public void visit(ReturnStmt node) {
+    private void visitReturnStmt(ReturnStmt node) {
         if (node.expr != null) {
             visit(node.expr);
         }
     }
 
-    @Override
-    public void visit(ExprStmt node) {
+    private void visitExprStmt(ExprStmt node) {
         visit(node.expr);
     }
-
-    @Override
-    public void visit(ArrayAssignStmt node) {
-        // Visit array expression, index, and value
-        visit(node.array);
-        visit(node.index);
-        visit(node.value);
-    }
 }
-

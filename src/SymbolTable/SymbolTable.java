@@ -90,6 +90,26 @@ public class SymbolTable {
     }
 
     /**
+     * Add a symbol to the parent scope (one level up from current).
+     * Returns true if successful, false if symbol already exists or no parent.
+     */
+    public boolean addSymbolToParent(String name, Symbol.SymbolType type, int line) {
+        Scope currentScope = getCurrentScope();
+        Scope parentScope = currentScope.getParent();
+        if (parentScope == null) {
+            return false; // No parent scope
+        }
+        String scopeName = parentScope.getName();
+        Symbol symbol = new Symbol(name, type, line, scopeName);
+        
+        if (!parentScope.addSymbol(symbol)) {
+            // Symbol already exists in parent scope
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Look up a symbol starting from the current scope.
      */
     public Symbol lookup(String name) {
