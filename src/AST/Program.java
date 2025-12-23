@@ -10,6 +10,10 @@ public class Program extends ASTNode {
         this.statements = statements;
     }
 
+    public List<Statement> getStatements() {
+        return statements;
+    }
+
     @Override
     public String prettyPrint(int indent) {
         StringBuilder sb = new StringBuilder();
