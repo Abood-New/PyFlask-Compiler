@@ -107,6 +107,21 @@ public class PythonVisitor extends PythonParserBaseVisitor<ASTNode> {
     }
 
     @Override
+    public ASTNode visitClassDefinition(PythonParser.ClassDefinitionContext ctx) {
+        String name = ctx.ID(0).getText();
+        String superClass = null;
+
+        if (ctx.ID().size() > 1) {
+            superClass = ctx.ID(1).getText();
+        }
+
+        Block block = (Block) visit(ctx.block());
+        int line = ctx.getStart().getLine();
+
+        return new ClassDef(line, name, superClass, block.getStatements());
+    }
+
+    @Override
     public ASTNode visitImportFrom(PythonParser.ImportFromContext ctx) {
         String module = ctx.dottedName().getText();
         List<String> names = new ArrayList<>();
@@ -245,6 +260,14 @@ public class PythonVisitor extends PythonParserBaseVisitor<ASTNode> {
         int line = ctx.getStart().getLine();
 
         return new BinaryExpr(line, left, ctx.op.getText(), right);
+    }
+
+    @Override
+    public ASTNode visitLogicalExpr(PythonParser.LogicalExprContext ctx) {
+        Expression left = (Expression) visit(ctx.expr(0));
+        Expression right = (Expression) visit(ctx.expr(1));
+        int line = ctx.getStart().getLine();
+        return new LogicalExpr(line, left, ctx.op.getText(), right);
     }
 
     @Override

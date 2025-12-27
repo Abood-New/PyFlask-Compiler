@@ -20,8 +20,10 @@ public class Main {
 
             PythonParser parser = new PythonParser(token);
             ParseTree tree = parser.prog();
-            PythonVisitor ProgramVisitor = new PythonVisitor();
-            Program program = (Program) ProgramVisitor.visit(tree);
+            PythonVisitor programVisitor = new PythonVisitor();
+            Program program = (Program) programVisitor.visit(tree);
+
+            // Pretty-print AST
             System.out.println(program);
         } catch (IOException e) {
             e.printStackTrace();

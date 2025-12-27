@@ -8,12 +8,13 @@ products = []
 def list_products():
 <INDENT>
     return render_template("product_template.html", section="list", products=products)
-<DEDENT>
+<DEDENT>    
+
 @app.route("/add", methods=["GET", "POST"])
 def add_product():
 <INDENT>
     if request.method == "POST":
-    <INDENT>
+<INDENT>    
         name = request.form.get("name")
         price = request.form.get("price")
         description = request.form.get("description")
@@ -27,9 +28,10 @@ def add_product():
         }
         products.append(product)
         return redirect(url_for("list_products"))
-     <DEDENT>
+        <DEDENT>   
     return render_template("product_template.html", section="add")
 <DEDENT>
+
 @app.route("/product/<int:product_id>")
 def view_product(product_id):
 <INDENT>
@@ -39,10 +41,11 @@ def view_product(product_id):
         <INDENT>
             return render_template("product_template.html", section="view", product=product)
         <DEDENT>
-     <DEDENT>
     return "Product not found"
-<DEDENT>
+    <DEDENT>
+<DEDENT>    
+    
 if __name__ == "__main__":
 <INDENT>
     app.run(debug=True)
-<DEDENT>
+<DEDENT>    
