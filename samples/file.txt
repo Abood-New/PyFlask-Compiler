@@ -45,6 +45,38 @@ def view_product(product_id):
     <DEDENT>
 <DEDENT>    
     
+@app.route('/delete/<int:product_id>', methods=['POST'])
+def delete_product(product_id):
+<INDENT>
+    global products
+
+    product = next((p for p in products if p['id'] == product_id), None)
+
+    if product == None:
+    <INDENT>
+        return "Not Found", 404
+    <DEDENT>
+
+    image_path = os.path.join(app.config['UPLOAD_FOLDER'], product['image'])
+    if product['image'] != 'default.jpg' and os.path.exists(image_path):
+    <INDENT>
+        os.remove(image_path)
+    <DEDENT>
+
+    new_products = []
+
+    for p in products:
+    <INDENT>
+        if p['id'] != product_id:
+        <INDENT>
+            new_products.append(p)
+        <DEDENT>
+    <DEDENT>
+    products = new_products
+
+    return redirect(url_for('display_products'))
+<DEDENT>
+
 if __name__ == "__main__":
 <INDENT>
     app.run(debug=True)

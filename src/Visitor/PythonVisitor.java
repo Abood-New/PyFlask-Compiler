@@ -105,6 +105,33 @@ public class PythonVisitor extends PythonParserBaseVisitor<ASTNode> {
     }
 
     @Override
+    public ASTNode visitGeneratorExpression(PythonParser.GeneratorExpressionContext ctx) {
+        int line = ctx.getStart().getLine();
+
+        IdentifierExpr yieldVar =
+                new IdentifierExpr(line, ctx.ID(0).getText());
+
+        IdentifierExpr loopVar =
+                new IdentifierExpr(line, ctx.ID(1).getText());
+
+        Expression iterable =
+                (Expression) visit(ctx.expr(0));
+
+        Expression filter = null;
+        if (ctx.expr().size() == 2) {
+            filter = (Expression) visit(ctx.expr(1));
+        }
+
+        return new GeneratorExpr(
+                line,
+                yieldVar,
+                loopVar,
+                iterable,
+                filter
+        );
+    }
+
+    @Override
     public ASTNode visitFunctionDefinition(PythonParser.FunctionDefinitionContext ctx) {
         String name = ctx.ID().getText();
         List<String> params = new ArrayList<>();
@@ -209,8 +236,8 @@ public class PythonVisitor extends PythonParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitAttributeExpr(PythonParser.AttributeExprContext ctx) {
-        Expression target = (Expression) visit(ctx.expr());
-        String attr = ctx.ID().getText();
+        Expression target = (Expression) visit(ctx.expr(0));
+        Expression attr = (Expression) visit(ctx.expr(1));
         int line = ctx.getStart().getLine();
 
         return new AttributeExpr(line, target, attr);

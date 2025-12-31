@@ -11,6 +11,7 @@ public class Program extends ASTNode {
     }
 
     public List<Statement> getStatements() {
+
         return statements;
     }
 

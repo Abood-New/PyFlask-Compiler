@@ -308,6 +308,18 @@ public interface PythonParserListener extends ParseTreeListener {
 	 */
 	void exitAttributeExpr(PythonParser.AttributeExprContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code GeneratorExpression}
+	 * labeled alternative in {@link PythonParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterGeneratorExpression(PythonParser.GeneratorExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code GeneratorExpression}
+	 * labeled alternative in {@link PythonParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitGeneratorExpression(PythonParser.GeneratorExpressionContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code ArrayLiteral}
 	 * labeled alternative in {@link PythonParser#expr}.
 	 * @param ctx the parse tree

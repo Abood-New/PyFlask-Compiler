@@ -187,6 +187,13 @@ public interface PythonParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitAttributeExpr(PythonParser.AttributeExprContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code GeneratorExpression}
+	 * labeled alternative in {@link PythonParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitGeneratorExpression(PythonParser.GeneratorExpressionContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code ArrayLiteral}
 	 * labeled alternative in {@link PythonParser#expr}.
 	 * @param ctx the parse tree

@@ -1,0 +1,9 @@
+if x:
+<INDENT>
+    print(x)
+    if(y):
+    <INDENT>
+        print(y)
+    <DEDENT>
+<DEDENT>
+print("done")

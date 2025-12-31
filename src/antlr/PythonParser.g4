@@ -42,7 +42,7 @@ exprStat
     ;
 
 returnStat
-    : RETURN expr NEWLINE?                             # ReturnStatement
+    : RETURN expr (COMMA NUMBER)? NEWLINE?                             # ReturnStatement
     ;
 
 breakStat
@@ -91,7 +91,7 @@ decorator
 // CONTROL FLOW
 // -------------------------------------------------
 ifStat
-    : IF expr COLON NEWLINE block (NEWLINE* ELSE NEWLINE block)?
+    : IF expr COLON NEWLINE block (NEWLINE* ELSE COLON? NEWLINE block)?
     ;
 
 forStat
@@ -116,8 +116,9 @@ expr
     | expr op=(LT|GT|GE|LE|EQ|NE) expr           # ComparisonExpr
     | expr ASSIGN expr                           # KeyValue
     | expr LSB expr RSB                          # IndexExpr
+    | LPARENS ID FOR ID IN expr (IF expr)? RPARENS # GeneratorExpression
     | ID LPARENS argList? RPARENS                # FunctionCallExpr
-    | expr DOT ID                                # AttributeExpr
+    | expr DOT expr                              # AttributeExpr
     | LSB argList? RSB                           # ArrayLiteral
     | LPARENS expr RPARENS                       # ParenExpr
     | LBK dictBody? RBK                          # DictLiteral
@@ -125,7 +126,7 @@ expr
     | STRING                                     # StringLiteral
     | BOOL                                       # BooleanLiteral
     | ID                                         # IdentifierExpr
-    ;
+;
 
 dictBody: NEWLINE* pair (NEWLINE* ',' NEWLINE* pair)* NEWLINE*;
 
@@ -133,4 +134,4 @@ pair: STRING COLON expr;
 
 
 argList : (arg (COMMA arg)*)?;
-arg : expr | ID ASSIGN expr;
+arg : NEWLINE* expr NEWLINE* | ID ASSIGN expr ;

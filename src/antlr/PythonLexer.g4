@@ -49,10 +49,20 @@ NUMBER
     ;
 
 fragment DIGIT : [0-9];
-STRING: '"' (~["\\] | '\\' .)* '"';
+STRING
+    : '"'  ( ~["\\]  | '\\' . )* '"'
+    | '\'' ( ~['\\]  | '\\' . )* '\''
+    ;
 NEWLINE: ('\r'? '\n')+ ;
-INDENT: '<INDENT>';
-DEDENT: '<DEDENT>';
+
 //NEWLINE: ('\r'? '\n' (' ' | '\t')*);
 WS: [ \t]+ -> skip;
+//COMMENT: '#' ~[\r\n]* -> skip;
+//NEWLINE: ( '\r\n' | '\r' | '\n' );
+//NEWLINE
+//    : ('\r'? '\n') [ \t]* ;
+
+//WS: [ \t]+ -> skip;
 COMMENT: '#' ~[\r\n]* -> skip;
+INDENT: '<INDENT>';
+DEDENT: '<DEDENT>';
